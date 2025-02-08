@@ -16,6 +16,12 @@ app.register_blueprint(user_routes)
 app.register_blueprint(transaction_routes)
 app.register_blueprint(prediction_routes)
 
+# Ensure datasets are available
+ensure_data_files()
+@app.route("/")
+def home():
+    return "AI-Powered Personal Finance Assistant API is Running!"
+
 if __name__ == "__main__":
     app.run(debug=True)
  pip install flask fastapi uvicorn pymongo python-dotenv gunicorn
