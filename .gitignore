@@ -1,3 +1,5 @@
 node_modules
 .env
 __pycache__
+backend/data/*
+!backend/data/.keep  # Keeps the folder in the repo
