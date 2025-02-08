@@ -18,3 +18,4 @@ app.register_blueprint(prediction_routes)
 
 if __name__ == "__main__":
     app.run(debug=True)
+ pip install flask fastapi uvicorn pymongo python-dotenv gunicorn
