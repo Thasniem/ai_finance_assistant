@@ -9,11 +9,11 @@ def add_user():
     return create_user()
 
 # Route to get user information by ID
-@user_routes.route('/user/<user_id>', methods=['GET'])  # Removed <int:user_id>
+@user_routes.route('/user/<int:user_id>', methods=['GET'])  
 def get_user_info(user_id):
     return get_user(user_id)
 
 # Route to update user information
-@user_routes.route('/user/<user_id>', methods=['PUT'])
+@user_routes.route('/user/<int:user_id>', methods=['PUT'])
 def update_user_info(user_id):
     return update_user(user_id)
