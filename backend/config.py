@@ -8,7 +8,8 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
 
     # Database settings (adjust for your DB configuration)
-    MONGO_URI = os.getenv('MONGO_URI', 'http://Thasniem:thfjd150@mycluster.0ivtg.mongodb.net/?retryWrites=true&w=majority&appName=MyCluster')
+    MONGO_URI = os.getenv('MONGO_URI', 'MONGO_URI = "mongodb+srv://Thasniem:thfjd150@mycluster.0ivtg.mongodb.net/finance_assistant_db?retryWrites=true&w=majority"
+')
     
     # Machine learning model path (in case you want to change the location)
     MODEL_PATH = os.getenv('MODEL_PATH', 'path_to_model/finance_predictor.pkl')
