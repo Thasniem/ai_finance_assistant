@@ -23,5 +23,8 @@ def home():
     return "AI-Powered Personal Finance Assistant API is Running!"
 
 if __name__ == "__main__":
-    app.run(debug=True)
- pip install flask fastapi uvicorn pymongo python-dotenv gunicorn
+    import os
+    port = int(os.environ.get("PORT", 5000))  # Render provides PORT dynamically
+    app.run(host="0.0.0.0", port=port)
+
+ 
