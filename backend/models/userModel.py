@@ -1,36 +1,18 @@
-# userModel.py
-
-from mongoengine import Document, StringField, IntField, FloatField, ListField
+from mongoengine import Document, StringField, FloatField
 
 class UserModel(Document):
     meta = {'collection': 'users'}
 
-    # User's ID (could be generated or used from an external system)
-    id = IntField(required=True, unique=True)
-    
-    # User's name
+    id = StringField(primary_key=True)  # ObjectId should be string
     name = StringField(required=True)
-
-    # Financial data
     income = FloatField(required=True)
     spending = FloatField(required=True)
-    
-    # Additional user details
-    birth_year = IntField()
-    birth_month = IntField()
-    gender = StringField()
-    address = StringField()
-    latitude = FloatField()
-    longitude = FloatField()
-    credit_score = IntField()
-    num_credit_cards = IntField()
 
-    # Method to save the user document
-    def save(self):
-        self.save()
+    def save_user(self):
+        """Save the user document."""
+        super().save()
 
-    # Method to update user details
     def update_user(self, data):
+        """Update user details."""
         self.update(**data)
         self.reload()
-
