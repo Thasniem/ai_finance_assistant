@@ -1,27 +1,31 @@
 import os
 
 class Config:
-    # Environment-specific configuration settings
-    DEBUG = True
+    # Enable debug mode for development
+    DEBUG = os.getenv('DEBUG', 'True') == 'True'  
+
+    # Security settings
     SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
 
-    # Database settings (MongoDB Atlas connection string)
-    MONGO_URI = os.getenv('MONGO_URI', 'mongodb+srv://Thasniem:thfjd150@mycluster.0ivtg.mongodb.net/finance_assistant_db?retryWrites=true&w=majority')
+    # Use environment variable for MongoDB URI (Avoid Hardcoding!)
+    MONGO_URI = os.getenv('MONGO_URI')
 
-    # Machine learning model path (adjust for your model location)
-    MODEL_PATH = os.getenv('MODEL_PATH', 'models/finance_predictor.pkl')
+    # Machine Learning Model Path (ensure model exists)
+    MODEL_PATH = os.getenv('MODEL_PATH', os.path.join(os.getcwd(), 'models/finance_predictor.pkl'))
 
-    # Directory for storing downloaded datasets
-    DATA_DIR = os.path.abspath("data")
+    # Create a proper data directory (absolute path)
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get base directory
+    DATA_DIR = os.path.join(BASE_DIR, "data")  
+    os.makedirs(DATA_DIR, exist_ok=True)  # Ensure the folder exists
 
-    # Google Drive dataset links (for training data)
+    # Google Drive Dataset Links (Use `gdown` for secure download)
     GOOGLE_DRIVE_LINKS = {
-        "cards_data": "https://drive.google.com/uc?export=download&id=1gk9heV3AcrS95Vs9cj-lV6LUOMW_MwUd",
-        "train_fraud_labels": "https://drive.google.com/uc?export=download&id=1VQltdmyAjpiYZQH1pyNc3M4rNoUDFrms",
-        "mcc_codes": "https://drive.google.com/uc?export=download&id=1by6hstymC_HlK2lgjcDj_cXJNTGavFCi"
+        "cards_data": "1gk9heV3AcrS95Vs9cj-lV6LUOMW_MwUd",
+        "train_fraud_labels": "1VQltdmyAjpiYZQH1pyNc3M4rNoUDFrms",
+        "mcc_codes": "1by6hstymC_HlK2lgjcDj_cXJNTGavFCi"
     }
 
-    # MongoDB collections (for real-time queries)
+    # MongoDB Collections
     MONGO_COLLECTIONS = {
         "transactions": "transactions_data",
         "users": "users_data"
