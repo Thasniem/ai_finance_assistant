@@ -1,5 +1,3 @@
-# transactionRoutes.py
-
 from flask import Blueprint, request, jsonify
 from controllers.transactionController import create_transaction, get_transactions, update_transaction
 
