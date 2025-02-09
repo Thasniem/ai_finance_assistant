@@ -4,12 +4,10 @@ from models.userModel import UserModel
 def get_user(user_id):
     """Retrieve a user by ID."""
     try:
-        user = UserModel.objects(id=user_id).first()
-
+        user = UserModel.get_user_by_id(user_id)
         if not user:
             return jsonify({"error": "User not found"}), 404
-
-        return jsonify(user.to_mongo().to_dict()), 200  # Return full user object
+        return jsonify(user), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -30,7 +28,11 @@ def create_user():
         data["credit_score"] = int(data["credit_score"])
         data["num_credit_cards"] = int(data["num_credit_cards"])
 
-        # Store per_capita_income, yearly_income, and total_debt as raw strings (with "$")
+        # Convert financial fields (remove "$" and store as float)
+        data["per_capita_income"] = float(data["per_capita_income"].replace("$", "").replace(",", ""))
+        data["yearly_income"] = float(data["yearly_income"].replace("$", "").replace(",", ""))
+        data["total_debt"] = float(data["total_debt"].replace("$", "").replace(",", ""))
+
         user = UserModel(**data)
         user.save_user()
 

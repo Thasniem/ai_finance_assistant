@@ -1,10 +1,10 @@
-#userModel.py
 from mongoengine import Document, StringField, IntField, FloatField
 
 class UserModel(Document):
     """User model schema for MongoDB."""
     meta = {'collection': 'users'}
 
+    # User Information
     id = IntField(primary_key=True, required=True)
     current_age = IntField(required=True)
     retirement_age = IntField(required=True)
@@ -14,7 +14,9 @@ class UserModel(Document):
     address = StringField(required=True)
     latitude = FloatField(required=True)
     longitude = FloatField(required=True)
-    per_capita_income = StringField(required=True)  # Keeping as string since it contains "$"
+
+    # Financial Data
+    per_capita_income = StringField(required=True)  # Keeping as string due to "$"
     yearly_income = StringField(required=True)
     total_debt = StringField(required=True)
     credit_score = IntField(required=True)
@@ -24,7 +26,13 @@ class UserModel(Document):
         """Save user instance to the database."""
         self.save()
 
+    @classmethod
+    def get_user_by_id(cls, user_id):
+        """Fetch user by ID."""
+        user = cls.objects(id=user_id).first()
+        return user.to_mongo().to_dict() if user else None
+
     def update_user(self, data):
         """Update user details with given data."""
-        self.update(**data)
+        self.modify(**data)
         self.reload()
