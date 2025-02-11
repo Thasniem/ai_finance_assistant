@@ -1,3 +1,3 @@
 # models/__init__.py
-from .userModel import User
-from .transactionModel import Transaction
+from .userModel import UserModel
+from .transactionModel import TransactionModel
