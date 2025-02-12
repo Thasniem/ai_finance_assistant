@@ -1,3 +1,3 @@
-from ..models.userModel import UserModel
-from ..models.transactionModel import TransactionModel
-from ..models.predictionModel import PredictionModel
+from backend.models.userModel import UserModel
+from backend.models.transactionModel import TransactionModel
+from backend.models.predictionModel import PredictionModel
