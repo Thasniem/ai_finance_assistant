@@ -30,6 +30,6 @@ class PredictionModel(Document):
 
     # Method to update prediction details
     def update_prediction(self, data):
-    self.modify(**data)
-    self.reload()
+        self.modify(**data)
+        self.reload()
 
