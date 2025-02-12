@@ -1,9 +1,9 @@
 #app.py
 import os
 from flask import Flask
-from routes.userRoutes import user_routes  # Ensure this import is correct
-from routes.transactionRoutes import transaction_routes
-from routes.predictionRoutes import prediction_routes
+from backend.routes.userRoutes import user_routes  # Ensure this import is correct
+from backend.routes.transactionRoutes import transaction_routes
+from backend.routes.predictionRoutes import prediction_routes
 from config import Config
 from utils.data_loader import ensure_data_files
 
