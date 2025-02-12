@@ -23,9 +23,11 @@ class UserModel(Document):
     num_credit_cards = IntField(required=True)
 
     def save_user(self):
-        """Save user instance to the database."""
+    """Save user instance to the database with error handling."""
+    try:
         self.save()
-
+    except Exception as e:
+        raise Exception(f"Database Error: {str(e)}")
     @classmethod
     def get_user_by_id(cls, user_id):
         """Fetch user by ID."""
