@@ -42,7 +42,7 @@ def create_user():
         return jsonify({"error": str(e)}), 500
 
 def update_user(user_id):
-    """Update user details."""
+    """Update user details and return updated user info."""
     try:
         data = request.get_json()
         user = UserModel.objects(id=user_id).first()
@@ -50,9 +50,10 @@ def update_user(user_id):
         if not user:
             return jsonify({"error": "User not found"}), 404
 
-        user.update_user(data)
+        updated_user = user.update_user(data)  # Modified function now returns updated user
 
-        return jsonify({"message": "User updated successfully", "user_id": user.id}), 200
+        return jsonify({"message": "User updated successfully", "updated_user": updated_user}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
