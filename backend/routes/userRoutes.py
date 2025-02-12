@@ -1,6 +1,6 @@
 #userRoutes
 from flask import Blueprint
-from controllers.userController import create_user, get_user, update_user
+from controllers.userController import  get_user, create_user, update_user
 
 user_routes = Blueprint('user_routes', __name__)
 

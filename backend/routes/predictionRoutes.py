@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from controllers.predictionController import create_prediction, get_prediction
+from backend.controllers.predictionController import create_prediction, get_prediction, make_prediction
 
 prediction_routes = Blueprint('prediction_routes', __name__)
 
