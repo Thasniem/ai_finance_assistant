@@ -26,9 +26,10 @@ class PredictionModel(Document):
     @classmethod
     def get_prediction_by_user(cls, user_id):
         prediction = cls.objects(user_id=user_id).order_by('-prediction_date').first()
-        return prediction.to_mongo().to_dict() if prediction else None
+        return prediction.to_mongo().to_dict() if prediction else {}
 
     # Method to update prediction details
     def update_prediction(self, data):
-        self.modify(**data)
-        self.reload()
+    self.modify(**data)
+    self.reload()
+

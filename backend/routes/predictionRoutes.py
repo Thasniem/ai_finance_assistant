@@ -7,11 +7,11 @@ prediction_routes = Blueprint('prediction_routes', __name__)
 @prediction_routes.route('/prediction', methods=['POST'])
 def add_prediction():
     data = request.get_json()
-    result, status = create_prediction(data)
-    return jsonify(result), status
+    result = create_prediction(data)
+    return jsonify(result), result[1] if isinstance(result, tuple) else 500  # Ensure valid status code
 
 # Route to get a prediction by user ID
 @prediction_routes.route('/prediction/<int:user_id>', methods=['GET'])
 def get_user_prediction(user_id):
-    result, status = get_prediction(user_id)
-    return jsonify(result), status
+    result = get_prediction(user_id)
+    return jsonify(result), result[1] if isinstance(result, tuple) else 500

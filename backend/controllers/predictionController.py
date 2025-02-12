@@ -23,7 +23,8 @@ def create_prediction(data):
         )
         new_prediction.save()
 
-        return {"message": "Prediction created successfully", "predicted_savings": predicted_savings}, 201
+        return jsonify({"message": "Prediction created successfully", "predicted_savings": predicted_savings}), 201
+
 
     except Exception as e:
         return {"error": str(e)}, 500
@@ -33,7 +34,7 @@ def get_prediction(user_id):
     try:
         prediction = PredictionModel.get_prediction_by_user(user_id)
         if prediction:
-            return {"user_id": user_id, "predicted_savings": prediction}
+            return jsonify({"user_id": user_id, "predicted_savings": prediction}), 200
         else:
             return {"error": "No prediction found for this user"}, 404
     except Exception as e:
