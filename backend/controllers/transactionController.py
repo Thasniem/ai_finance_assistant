@@ -8,7 +8,7 @@ def create_transaction(data):
         transaction = TransactionModel(
             client_id=data["client_id"],
             card_id=data["card_id"],
-            amount=float(data["amount"].replace("$", "")),  # Removing $ sign if present
+            amount = float(data["amount"].replace("$", "").strip()),  # Ensure no spaces
             date=data.get("date", datetime.utcnow()),
             use_chip=data.get("use_chip", ""),
             merchant_id=data.get("merchant_id"),
