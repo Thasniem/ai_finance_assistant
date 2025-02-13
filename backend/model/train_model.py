@@ -1,71 +1,91 @@
 import pandas as pd
 import numpy as np
-import joblib
 import os
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+import pickle
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from google_drive_downloader import GoogleDriveDownloader as gdd
 
-# Define paths for data (Update if needed)
-TRANSACTIONS_PATH = "backend/data/transactions_data.xlsx"
-USERS_PATH = "backend/data/users_data.xlsx"
-MODEL_DIR = "backend/model"
+# Define file paths
+DATA_FOLDER = "data/"
+MODEL_FOLDER = "backend/model/"
 
-# Ensure the model directory exists
-os.makedirs(MODEL_DIR, exist_ok=True)
+GOOGLE_DRIVE_LINKS = {
+    "cards_data": "1gk9heV3AcrS95Vs9cj-lV6LUOMW_MwUd",
+    "train_fraud_labels": "1VQltdmyAjpiYZQH1pyNc3M4rNoUDFrms",
+    "mcc_codes": "1by6hstymC_HlK2lgjcDj_cXJNTGavFCi"
+}
 
-# Function to clean currency values
-def clean_currency(value):
-    """Convert currency values (e.g., '$77.00') to float."""
-    if isinstance(value, str):
-        return float(value.replace("$", "").replace(",", ""))
-    return value
+# Ensure directories exist
+os.makedirs(MODEL_FOLDER, exist_ok=True)
 
-# Load transaction data
-transactions = pd.read_excel(TRANSACTIONS_PATH)
-transactions["amount"] = transactions["amount"].apply(clean_currency)
+# Function to download files from Google Drive
+def download_data():
+    for name, file_id in GOOGLE_DRIVE_LINKS.items():
+        file_path = os.path.join(DATA_FOLDER, f"{name}.xls")
+        if not os.path.exists(file_path):
+            print(f"Downloading {name}...")
+            gdd.download_file_from_google_drive(file_id=file_id, dest_path=file_path, unzip=False)
 
-# Load user data
-users = pd.read_excel(USERS_PATH)
-users["yearly_income"] = users["yearly_income"].apply(clean_currency)
-users["per_capita_income"] = users["per_capita_income"].apply(clean_currency)
-users["total_debt"] = users["total_debt"].apply(clean_currency)
+# Load datasets
+def load_data():
+    download_data()
+    users_df = pd.read_excel(os.path.join(DATA_FOLDER, "users_data.xls"))
+    transactions_df = pd.read_excel(os.path.join(DATA_FOLDER, "transactions_data.xls"))
+    cards_df = pd.read_excel(os.path.join(DATA_FOLDER, "cards_data.xls"))
+    fraud_labels_df = pd.read_excel(os.path.join(DATA_FOLDER, "train_fraud_labels.xls"))
+    mcc_df = pd.read_excel(os.path.join(DATA_FOLDER, "mcc_codes.xls"))
+    
+    return users_df, transactions_df, cards_df, fraud_labels_df, mcc_df
 
-# Merge transactions with user data based on client_id
-data = transactions.merge(users, left_on="client_id", right_on="id")
+# Data Preprocessing
+def preprocess_data(users_df, transactions_df, cards_df, fraud_labels_df):
+    # Merge transactions with fraud labels
+    transactions_df = transactions_df.merge(fraud_labels_df, left_on="id", right_on="transaction_id", how="left")
+    
+    # Convert categorical data to numeric
+    transactions_df["errors"].fillna("No Error", inplace=True)
+    transactions_df["errors"] = transactions_df["errors"].astype("category").cat.codes
+    transactions_df["use_chip"] = transactions_df["use_chip"].astype("category").cat.codes
+    
+    # Convert financial fields to numeric
+    users_df["yearly_income"] = users_df["yearly_income"].replace("[\$,]", "", regex=True).astype(float)
+    users_df["total_debt"] = users_df["total_debt"].replace("[\$,]", "", regex=True).astype(float)
 
-# Feature Selection (Choose meaningful features)
-features = [
-    "amount", "use_chip", "merchant_id", "zip", "credit_score",
-    "yearly_income", "total_debt", "num_credit_cards"
-]
-target = "savings_prediction"  # Adjust this based on your goal
+    # Merge transactions with user data
+    df = transactions_df.merge(users_df, left_on="client_id", right_on="id", how="left")
 
-# Drop missing values
-data = data.dropna(subset=features)
+    # Define features and labels
+    X = df[["amount", "errors", "use_chip", "yearly_income", "total_debt", "credit_score", "num_credit_cards"]]
+    y = df["is_fraud"]  # Assuming 'is_fraud' is in fraud_labels_df
 
-# Encode categorical variables (use_chip)
-label_encoder = LabelEncoder()
-data["use_chip"] = label_encoder.fit_transform(data["use_chip"])
+    return X, y
 
-# Split into features (X) and target (y)
-X = data[features]
-y = np.random.randint(500, 5000, size=len(X))  # Generate dummy target for now
+# Train the Model
+def train_model(X, y):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Standardize features
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
-# Scale numerical features
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+    # Train classifier
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train_scaled, y_train)
 
-# Train model
-model = RandomForestRegressor(n_estimators=100, random_state=42)
-model.fit(X_train_scaled, y_train)
+    # Save model and scaler
+    with open(os.path.join(MODEL_FOLDER, "finance_model.pkl"), "wb") as f:
+        pickle.dump(model, f)
+    
+    with open(os.path.join(MODEL_FOLDER, "scaler.pkl"), "wb") as f:
+        pickle.dump(scaler, f)
 
-# Save model and scaler
-joblib.dump(model, os.path.join(MODEL_DIR, "finance_model.pkl"))
-joblib.dump(scaler, os.path.join(MODEL_DIR, "scaler.pkl"))
+    print("Model training completed and saved!")
 
-print("Model and scaler saved successfully!")
+# Run training pipeline
+if __name__ == "__main__":
+    users_df, transactions_df, cards_df, fraud_labels_df, mcc_df = load_data()
+    X, y = preprocess_data(users_df, transactions_df, cards_df, fraud_labels_df)
+    train_model(X, y)
