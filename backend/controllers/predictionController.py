@@ -1,7 +1,6 @@
 from flask import jsonify, request
-from models.predictionModel import PredictionModel  # Corrected import
-from services.mlService import predict_savings  # Corrected import
-
+from backend.models.predictionModel import PredictionModel
+from backend.services.mlService import predict_finance
 # Function to create and store a new prediction
 def create_prediction(data):
     try:
