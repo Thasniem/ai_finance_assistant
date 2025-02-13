@@ -50,8 +50,8 @@ def preprocess_data(users_df, transactions_df, cards_df, fraud_labels_df):
     transactions_df["use_chip"] = transactions_df["use_chip"].astype("category").cat.codes
     
     # Convert financial fields to numeric
-    users_df["yearly_income"] = users_df["yearly_income"].replace("[\$,]", "", regex=True).astype(float)
-    users_df["total_debt"] = users_df["total_debt"].replace("[\$,]", "", regex=True).astype(float)
+    users_df["yearly_income"] = users_df["yearly_income"].replace(r"[\$,]", "", regex=True).astype(float)
+    users_df["total_debt"] = users_df["total_debt"].replace(r"[\$,]", "", regex=True).astype(float)
 
     # Merge transactions with user data
     df = transactions_df.merge(users_df, left_on="client_id", right_on="id", how="left")
