@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from backend.models.userModel import UserModel
+from ..userModel import UserModel
 
 def get_user(user_id):
     """Retrieve a user by ID."""

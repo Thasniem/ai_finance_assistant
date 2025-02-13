@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from backend.models.transactionModel import TransactionModel
+from ..transactionModel import TransactionModel
 from datetime import datetime
 
 # Create a new transaction
