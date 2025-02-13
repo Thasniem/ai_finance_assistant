@@ -18,6 +18,7 @@ GOOGLE_DRIVE_LINKS = {
 }
 
 # Ensure directories exist
+os.makedirs(DATA_FOLDER, exist_ok=True)
 os.makedirs(MODEL_FOLDER, exist_ok=True)
 
 # Function to download files from Google Drive
@@ -31,8 +32,9 @@ def download_data():
 # Load datasets
 def load_data():
     download_data()
+
     users_df = pd.read_excel(os.path.join(DATA_FOLDER, "users_data.xls"))
-    transactions_df = pd.read_excel(os.path.join(DATA_FOLDER, "transactions_data.xls"))
+    transactions_df = pd.read_excel(os.path.join(DATA_FOLDER, "transaction_data.xls"))
     cards_df = pd.read_excel(os.path.join(DATA_FOLDER, "cards_data.xls"))
     fraud_labels_df = pd.read_excel(os.path.join(DATA_FOLDER, "train_fraud_labels.xls"))
     mcc_df = pd.read_excel(os.path.join(DATA_FOLDER, "mcc_codes.xls"))
@@ -41,24 +43,34 @@ def load_data():
 
 # Data Preprocessing
 def preprocess_data(users_df, transactions_df, cards_df, fraud_labels_df):
+    print("Fraud Labels Columns:", fraud_labels_df.columns)  # Debugging Step
+    
+    if "transaction_id" not in fraud_labels_df.columns:
+        raise ValueError("Expected column 'transaction_id' missing in fraud_labels_df")
+
     # Merge transactions with fraud labels
-    transactions_df = transactions_df.merge(fraud_labels_df, left_on="id", right_on="transaction_id", how="left")
+    transactions_df = transactions_df.merge(
+        fraud_labels_df, left_on="id", right_on="transaction_id", how="left"
+    )
     
     # Convert categorical data to numeric
     transactions_df["errors"].fillna("No Error", inplace=True)
     transactions_df["errors"] = transactions_df["errors"].astype("category").cat.codes
     transactions_df["use_chip"] = transactions_df["use_chip"].astype("category").cat.codes
-    
-    # Convert financial fields to numeric
-    users_df["yearly_income"] = users_df["yearly_income"].replace(r"[\$,]", "", regex=True).astype(float)
-    users_df["total_debt"] = users_df["total_debt"].replace(r"[\$,]", "", regex=True).astype(float)
+
+    # Handle missing financial values
+    users_df["yearly_income"] = users_df["yearly_income"].replace(r"[\$,]", "", regex=True).fillna(0).astype(float)
+    users_df["total_debt"] = users_df["total_debt"].replace(r"[\$,]", "", regex=True).fillna(0).astype(float)
 
     # Merge transactions with user data
     df = transactions_df.merge(users_df, left_on="client_id", right_on="id", how="left")
 
     # Define features and labels
+    if "is_fraud" not in df.columns:
+        raise ValueError("Column 'is_fraud' missing in fraud labels dataset")
+
     X = df[["amount", "errors", "use_chip", "yearly_income", "total_debt", "credit_score", "num_credit_cards"]]
-    y = df["is_fraud"]  # Assuming 'is_fraud' is in fraud_labels_df
+    y = df["is_fraud"]
 
     return X, y
 
